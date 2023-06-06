@@ -1,2 +1,5 @@
 .~lock*
 *.docx
+*.pdf
+*.html
+__pycache__/*
