@@ -15,18 +15,15 @@ arg_parser.add_argument('output', default=None, help='Output file')
 arg_parser.add_argument('--files', default="*.md", help='Regex for Markdown files')
 args = arg_parser.parse_args()
 
-def format_document(soup):
+def format_html(soup):
     # Remove empty table headings
     for t in soup.find_all('table'):
         header_empty = True
         for th in t.thead.tr:
-            print(th.text)
             if not th.text.rstrip() == '':
-                print("Succeeded somehow")
                 header_empty = False
                 break
         if header_empty:
-            print("DIDIT!")
             t.thead.clear()
 
 def apply_style(document):
@@ -72,21 +69,20 @@ def apply_style(document):
     style.font.italic = False
     style.font.color.rgb = RGBColor(0x66, 0x66, 0x66)
 
-    # TODO: Remove empty first lines from all tables
-
 file_data = []
 for part in sorted(glob.glob(args.files)):
     with open(part, 'r', encoding="utf-8") as f:
         file_data.append(f.read())
 
 html = ''.join([mistletoe.markdown(data) for data in file_data])
+# print(html)
 
 soup = bs(html, 'html.parser')
 
 # Apply custom HTML formatting
-format_document(soup)
+format_html(soup)
 
-html = soup.prettify("utf-8").decode()
+html = soup.decode()
 open('test.html','w').write(html)
 print(html)
 
