@@ -1,6 +1,7 @@
 import subprocess
 import base64
 import os
+import css_inline
 
 file_path = os.path.dirname(__file__)
 
@@ -17,8 +18,14 @@ def highlight(code, language):
     if (result.stderr.strip() != ''):
         raise Exception(result.stderr.strip())
 
-    return base64.b64decode(output).decode('utf-8')
+    code = base64.b64decode(output).decode('utf-8')
+    css = open(os.path.join(file_path, 'prism.css')).read()
+    inline = css_inline.inline(f'<style>{css}</style>'+code)
+    code = inline[inline.find('<body>')+len('<body>'):][:-len('</body></html>')]
+    return code
+
 
 if __name__ == '__main__':
     code = "const message = 'Hello, World!';"
-    print(highlight(code, 'javascript'))
+    code_hl = (highlight(code, 'javascript'))
+    print(code_hl)
