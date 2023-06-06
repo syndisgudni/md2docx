@@ -15,6 +15,20 @@ arg_parser.add_argument('output', default=None, help='Output file')
 arg_parser.add_argument('--files', default="*.md", help='Regex for Markdown files')
 args = arg_parser.parse_args()
 
+def format_document(soup):
+    # Remove empty table headings
+    for t in soup.find_all('table'):
+        header_empty = True
+        for th in t.thead.tr:
+            print(th.text)
+            if not th.text.rstrip() == '':
+                print("Succeeded somehow")
+                header_empty = False
+                break
+        if header_empty:
+            print("DIDIT!")
+            t.thead.clear()
+
 def apply_style(document):
     ## Page setup
     section = document.sections[-1]
@@ -69,6 +83,9 @@ html = ''.join([mistletoe.markdown(data) for data in file_data])
 
 soup = bs(html, 'html.parser')
 
+# Apply custom HTML formatting
+format_document(soup)
+
 html = soup.prettify("utf-8").decode()
 open('test.html','w').write(html)
 print(html)
@@ -80,5 +97,4 @@ parser.add_html_to_document(html, document)
 
 apply_style(document)
 
-# do more stuff to document
 document.save(args.output)
