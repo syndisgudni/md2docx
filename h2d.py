@@ -219,6 +219,8 @@ class HtmlToDocx(HTMLParser):
             align = style['text-align']
             if align == 'center':
                 self.paragraph.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            elif align == 'left':
+                self.paragraph.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
             elif align == 'right':
                 self.paragraph.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
             elif align == 'justify':

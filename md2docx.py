@@ -26,6 +26,10 @@ def format_html(soup):
         if header_empty:
             t.thead.clear()
 
+    # Left-align all code paragraphs
+    for p in soup.find_all('pre'):
+        p['style'] = 'text-align: left'
+
 def apply_style(document):
     ## Page setup
     section = document.sections[-1]
@@ -40,6 +44,7 @@ def apply_style(document):
     style = document.styles['Normal']
     style.font.name = 'Calibri'
     style.font.size = Pt(11)
+    style.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
     ## Code
     style = document.styles.add_style('Code', WD_STYLE_TYPE.CHARACTER)
