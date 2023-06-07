@@ -522,7 +522,9 @@ class HtmlToDocx(HTMLParser):
             return
 
         # Only remove white space if we're not in a pre block.
-        if 'pre' not in self.tags:
+        if 'pre' in self.tags:
+            data = data.rstrip()
+        else:
             # remove leading and trailing whitespace in all instances
             data = remove_whitespace(data, True, True)
 
@@ -544,6 +546,12 @@ class HtmlToDocx(HTMLParser):
                 if 'style' in span:
                     style = self.parse_dict_string(span['style'])
                     self.add_styles_to_run(style)
+
+            # Add generic HTML style support
+            current_tag = self.tags[list(self.tags)[-1]]
+            if 'style' in current_tag:
+                style = self.parse_dict_string(current_tag['style'])
+                self.add_styles_to_run(style)
 
             # add font style and name
             for tag in self.tags:

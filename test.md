@@ -21,7 +21,7 @@ print(a + b)
 
 hahah test Stuff and things are bad and therefore not good. It cannot be stressed enough how not ok this is. Figure 1.1 illustrates how bad this is.
 
-**TODO** Add some *things*!
+**TODO** Add some `code` ***stuff*** and *things*!
 
 Another paragraph is required to explain all the bad things an adversary could do with this vulnerability.
 
