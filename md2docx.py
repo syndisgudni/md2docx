@@ -9,9 +9,11 @@ from prism import highlight
 # DOCX
 from docx import Document
 from docx.shared import Pt, Inches, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_UNDERLINE
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from docx.opc.constants import RELATIONSHIP_TYPE
+from docx.text.run import Run
 # Utils
 import argparse
 import glob
@@ -209,6 +211,13 @@ def apply_html_style(soup):
         style['font-size'] = '9pt'
         t['style'] = dict_to_style(style)
 
+    # Hyperlinks
+    for t in soup.find_all('a'):
+        style = base_style.copy()
+        style['color'] = '#1155cc'
+        style['text-decoration-line'] = 'underline'
+        t['style'] = dict_to_style(style)
+
     # Code blocks
     for t in soup.select('pre > code'):
         style = base_style.copy()
@@ -224,7 +233,11 @@ def apply_html_style(soup):
             lang = t['class'][0].removeprefix('language-')
         code = t.string
         t.clear()
-        new_soup = bs(highlight(code, lang), 'html.parser')
+        if not lang == '':
+            inner_html = highlight(code, lang)
+        else:
+            inner_html = code
+        new_soup = bs(inner_html, 'html.parser')
         t.append(new_soup)
 
     # Image
@@ -371,6 +384,8 @@ class HtmlToDocx:
             r.bold = (style['font-weight'] == 'bold')
         if 'color' in style:
             r.font.color.rgb = font_color(style['color'])
+        if 'text-decoration-line' in style and style['text-decoration-line'] == 'underline':
+            r.underline = WD_UNDERLINE.SINGLE
         scope = [t.name for t in self.stack]
         r.bold = r.bold or 'strong' in scope
         r.italic = r.italic or 'em' in scope
@@ -419,6 +434,24 @@ class HtmlToDocx:
         self.stack.pop()
         return tag.text
 
+    def render_link(self, tag, p):
+        url = ''
+        if 'href' in tag.attrs:
+            url = tag['href']
+        text = tag.text
+        
+        r_id = p.part.relate_to(url, RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+        h = OxmlElement('w:hyperlink')
+        h.set(qn('r:id'), r_id)
+
+        r = Run(OxmlElement('w:r'), p)
+        r.text = text
+
+        self.apply_inline_style(r, get_style(tag))
+
+        h.append(r._element)
+        p._p.append(h)
+
     def render_paragraph(self, tag, p=None):
         if p == None:
             if 'img' in [t.name for t in tag.children]:
@@ -429,7 +462,8 @@ class HtmlToDocx:
         self.apply_block_style(p, get_style(tag))
         for t in tag:
             if t.name == 'img': continue
-            self.render_text(t, p)
+            elif t.name == 'a': self.render_link(t, p)
+            else: self.render_text(t, p)
         return p
 
     def render_table(self, tag):
@@ -520,7 +554,7 @@ html = soup.decode()
 apply_html_style(soup)
 
 # For testing
-# open('test.html','w').write(str(soup))
+open('test.html','w').write(str(soup))
 
 document = HtmlToDocx(soup).render()
 

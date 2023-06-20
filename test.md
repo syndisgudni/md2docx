@@ -28,13 +28,13 @@ print("lol")
 ```
 **Figure 1.1:** *Code caption with `code` in it.*
 
-Another paragraph is required to explain all the bad things an adversary could do with this vulnerability.
+Another paragraph is required to explain all the bad things an adversary could do with this vulnerability. Also, [here](https://syndis.is) is a link to the [syndis.is](https://syndis.is) website.
 
 | **Column 1** | **Another column** | **Notes** |
 | ------------ | ------------------ | --------- |
 | Thing        | Stuff              | asdf      |
 | Test         | **Ing**            |           |
-| Third        | Thing              | table     |
+| Third        | Thing              | [OMG Link in a table. What will he do next???](https://syndis.is)     |
 | Fourth       | Be                 | with      |
 **Figure 1.2:** *Table caption with `code` in it.*
 
