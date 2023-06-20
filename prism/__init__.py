@@ -9,7 +9,7 @@ languages = ["markup", "css", "clike", "javascript", "abap", "abnf", "actionscri
 
 def highlight(code, language):
     code_b64 = base64.b64encode(code.encode()).decode('utf-8')
-
+    
     node_command = ['node', os.path.join(file_path,'highlight.js'), code_b64, language]
 
     result = subprocess.run(node_command, capture_output=True, text=True)

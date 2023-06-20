@@ -1,31 +1,45 @@
 ## 1 A Thing is Wrong
 
-```python
-# some python code
-a = 1
-b = 2
-print(a + b)
-```
-
-# New thing
-
 | | |
 | ----------------- | ------- |
 | **Severity**          | **High** |
 | **Date Sent**         | 2023-06-02 |
 | **Location**          | `appsettings.json` |
 | **Issue Identifier**  | `SYN-XX-Y-Z` |
-| **Impact**            | Things are very not ok. As a result, an adversary can do stuff that is bad. |
+| **Impact**            | Things are very not ok. As a result, an adversary can do stuff that is bad. Here is some more text to ensure a multiline impact description. Move along, just rest assured knowing that things are bad and you should feel bad. |
 
 ### Technical Details
 
-hahah test Stuff and things are bad and therefore not good. It cannot be stressed enough how not ok this is. Figure 1.1 illustrates how bad this is.
+Stuff and things are bad and therefore not good. It cannot be stressed enough how not ok this is. Figure 1.1 illustrates how bad this is.
 
-**TODO** Add some `code` ***stuff*** and *things*!
+Here is a **TODO** list with ***some* things** of those *items* that have yet to be `done` for this project.
+* Add some `code` ***stuff*** and *things*!
+* Also, put imgs and code blocks in figurese.
+
+```python
+import stuff
+
+# comment
+
+thing = stuff.things()
+
+print(thing)
+print("lol")
+```
+**Figure 1.1:** *Code caption with `code` in it.*
 
 Another paragraph is required to explain all the bad things an adversary could do with this vulnerability.
 
+| **Column 1** | **Another column** | **Notes** |
+| ------------ | ------------------ | --------- |
+| Thing        | Stuff              | asdf      |
+| Test         | **Ing**            |           |
+| Third        | Thing              | table     |
+| Fourth       | Be                 | with      |
+**Figure 1.2:** *Table caption with `code` in it.*
+
 ![puppy](puppy.jpeg)
+**Figure 1.3:** *Puppy caption with `code` in it.*
 
 ### Recommendation
 
