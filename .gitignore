@@ -5,6 +5,5 @@
 __pycache__/*
 prism/__pycache__/*
 .venv/*
-bdr-*
 
 **/node_modules/

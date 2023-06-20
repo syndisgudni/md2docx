@@ -41,11 +41,21 @@ def par_align(j):
         case 'right':
             return WD_ALIGN_PARAGRAPH.RIGHT
 
-# TODO: Replace this hacky mess with another, hackier mess that does not require saving a bordered copy to disk
-def set_image_border(input_image):
-    img = Image.open(input_image)
-    bimg = ImageOps.expand(img, border=1)
-    bimg.save('bdr-' + input_image)
+def set_image_border(img, sz, color):
+    i = img._inline
+    pic = i.graphic.graphicData.pic
+    spPr = pic.spPr
+
+    ln = OxmlElement('a:ln', {'w': '12700'})
+    spPr.append(ln)
+
+    solidFill = OxmlElement('a:solidFill')
+    ln.append(solidFill)
+    srgbClr = OxmlElement('a:srgbClr', {'val': '666666'})
+    solidFill.append(srgbClr)
+    
+    prstDash = OxmlElement('a:prstDash', {'val': 'solid'})
+    ln.append(prstDash)
 
 def set_paragraph_border(par, **kwargs):
     """
@@ -221,6 +231,7 @@ def apply_html_style(soup):
     for i in soup.find_all('img'):
         style = base_style.copy()
         style['width'] = DOC_TEXT_WIDTH
+        style['border'] = '1px solid #000000'
         i['style'] = dict_to_style(style)
 
     # Captions
@@ -368,8 +379,6 @@ class HtmlToDocx:
         if 'text-align' in style:
             p.alignment = par_align(style['text-align'])
         if 'border' in style:
-            # p.paragraph_format.line_spacing = Pt(32)
-            # p.paragraph_format.left_indent = Pt(32)
             sz,_,color = style['border'].split(' ')
             set_paragraph_border(p,
                 top={'sz': sz, 'val': 'single', 'color': color, 'space': '4'},
@@ -395,6 +404,9 @@ class HtmlToDocx:
     def apply_image_style(self, i, style):
         if 'width' in style:
             i.width = font_size(style['width'])
+        if 'border' in style:
+            sz,_,color = style['border'].split(' ')
+            set_image_border(i, sz, color)
 
     def render_text(self, tag, p):
         if not isinstance(tag, Tag):
@@ -447,10 +459,7 @@ class HtmlToDocx:
         return h
 
     def render_image(self, tag):
-        filename = 'bdr-' + tag['src']
-        if not os.path.exists(filename):
-            set_image_border(tag['src'])
-        i = self.doc.add_picture(filename, width=font_size(DOC_TEXT_WIDTH))
+        i = self.doc.add_picture(tag['src'], width=font_size(DOC_TEXT_WIDTH))
         self.apply_image_style(i, get_style(tag))
         return i
 
@@ -510,9 +519,8 @@ html = soup.decode()
 
 apply_html_style(soup)
 
-# TODO: For testing
-# print("->BEGIN HTML INPUT\n%s<-END HTML INPUT" % soup)
-open('test.html','w').write(str(soup))
+# For testing
+# open('test.html','w').write(str(soup))
 
 document = HtmlToDocx(soup).render()
 
