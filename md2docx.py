@@ -231,12 +231,12 @@ def apply_html_style(soup):
         lang = ''
         if 'class' in t.attrs:
             lang = t['class'][0].removeprefix('language-')
-        code = t.string
+        code = t.get_text()
         t.clear()
-        if not lang == '':
-            inner_html = highlight(code, lang)
-        else:
+        if lang == '':
             inner_html = code
+        else:
+            inner_html = highlight(code, lang)
         new_soup = bs(inner_html, 'html.parser')
         t.append(new_soup)
 
@@ -297,6 +297,8 @@ def apply_html_style(soup):
     ## Remove empty table heads
     for t in soup.find_all('table'):
         header_empty = True
+        if not t.thead:
+            break
         for th in t.thead.tr:
             if not th.text.rstrip() == '':
                 header_empty = False
@@ -306,6 +308,10 @@ def apply_html_style(soup):
     ## Remove those weird alignment attributes on every table cell
     for t in soup.select('tr > *'):
         if 'align' in t.attrs: del t['align']
+        ## Force left-alignment on table cells
+        style = style_to_dict(t['style'])
+        style['text-align'] = 'left'
+        t['style'] = dict_to_style(style)
     ## All tables
     for t in soup.find_all('table'):
         t['style'] = dict_to_style(table_style)
@@ -317,8 +323,8 @@ def apply_html_style(soup):
             else: style = base_style.copy()
             style['border-top'] = '6px solid %s' % COLOR_SYN_BLUE
             c['style'] = dict_to_style(style)
-        ### First column
         for r in t.tbody.find_all('tr'):
+            ### First column
             c = r.td
             if 'style' in c.attrs: style = style_to_dict(c['style'])
             else: style = base_style.copy()
@@ -327,8 +333,7 @@ def apply_html_style(soup):
             style['background-color'] = COLOR_SYN_BLUE
             style['width'] = '82.512pt'
             c['style'] = dict_to_style(style)
-        ### Second column
-        for r in t.tbody.find_all('tr'):
+            ### Second column
             c = r.select('td:nth-child(2)')[0]
             if 'style' in c.attrs: style = style_to_dict(c['style'])
             else: style = base_style.copy()
@@ -337,12 +342,13 @@ def apply_html_style(soup):
     ## Other tables
     for t in soup.select("*:not(h2) + table"):
         ### Top row
-        for c in t.thead.find_all('th'):
-            if 'style' in c.attrs: style = style_to_dict(c['style'])
-            else: style = base_style.copy()
-            style['color'] = '#ffffff'
-            style['background-color'] = COLOR_SYN_BLUE
-            c['style'] = dict_to_style(style)
+        if t.thead:
+            for c in t.thead.find_all('th'):
+                if 'style' in c.attrs: style = style_to_dict(c['style'])
+                else: style = base_style.copy()
+                style['color'] = '#ffffff'
+                style['background-color'] = COLOR_SYN_BLUE
+                c['style'] = dict_to_style(style)
         ### Every other row
         for r in t.tbody.select('tr:nth-child(even)'):
             for c in r.find_all('td'):
@@ -350,6 +356,41 @@ def apply_html_style(soup):
                 else: style = base_style.copy()
                 style['background-color'] = '#efefef'
                 c['style'] = dict_to_style(style)
+    ## Request/response tables
+    for t in soup.select(".reqres"):
+        c = t.th
+        if 'style' in c.attrs: style = style_to_dict(c['style'])
+        else: style = base_style.copy()
+        style['font-size'] = '12pt'
+        c['style'] = dict_to_style(style)
+        for r in t.tbody.find_all('tr'):
+            ### First column
+            c = r.td
+            if 'style' in c.attrs: style = style_to_dict(c['style'])
+            else: style = base_style.copy()
+            style['width'] = '80pt'
+            style['font-size'] = '12pt'
+            c['style'] = dict_to_style(style)
+            ### Second column
+            c = r.select('td:nth-child(2)')[0]
+            if 'style' in c.attrs: style = style_to_dict(c['style'])
+            else: style = base_style.copy()
+            style['width'] = '370pt'
+            c['style'] = dict_to_style(style)
+        ### Every cell
+        for c in t.tbody.find_all('td'):
+            if 'style' in c.attrs: style = style_to_dict(c['style'])
+            else: style = base_style.copy()
+            style['border-bottom'] = '2px solid %s' % COLOR_SYN_BLUE
+            c['style'] = dict_to_style(style)
+        ### Every other row
+        for r in t.tbody.select('tr:nth-child(even)'):
+            for c in r.find_all('td'):
+                if 'style' in c.attrs: style = style_to_dict(c['style'])
+                else: style = base_style.copy()
+                del style['background-color']
+                c['style'] = dict_to_style(style)
+        
 
 
 class HtmlToDocx:
@@ -387,8 +428,8 @@ class HtmlToDocx:
         if 'text-decoration-line' in style and style['text-decoration-line'] == 'underline':
             r.underline = WD_UNDERLINE.SINGLE
         scope = [t.name for t in self.stack]
-        r.bold = r.bold or 'strong' in scope
-        r.italic = r.italic or 'em' in scope
+        r.bold = r.bold or 'strong' in scope or 'b' in scope
+        r.italic = r.italic or 'em' in scope or 'i' in scope
 
     def apply_block_style(self, p, style):
         if 'text-align' in style:
@@ -408,6 +449,9 @@ class HtmlToDocx:
         if 'border-top' in style:
             sz,_,color = style['border-top'].split(' ')
             set_cell_border(c, top={'sz': sz, 'val': 'single', 'color': color, 'space': '0'})
+        if 'border-bottom' in style:
+            sz,_,color = style['border-bottom'].split(' ')
+            set_cell_border(c, bottom={'sz': sz, 'val': 'single', 'color': color, 'space': '0'})
 
     def apply_column_style(self, c, style):
         if 'width' in style:
@@ -453,6 +497,7 @@ class HtmlToDocx:
         p._p.append(h)
 
     def render_paragraph(self, tag, p=None):
+        # This is a weird workaround because python-docx is bad with pictures
         if p == None:
             if 'img' in [t.name for t in tag.children]:
                 self.render_image(tag.img)
@@ -483,6 +528,11 @@ class HtmlToDocx:
         for c, col in enumerate(t.columns):
             soup_cell = tag.select('td:nth-child(%d)' % (c+1))[0]
             self.apply_column_style(col, get_style(soup_cell))
+                
+        # Merge top-row cells in request/response tables
+        if 'class' in tag.attrs and 'reqres' in tag['class']:
+            t.cell(0, 0).merge(t.cell(0, 1))
+
         return t
 
     def render_heading(self, tag):
@@ -501,9 +551,13 @@ class HtmlToDocx:
         # Remove trailing newline
         if len(tag.code.contents) > 1:
             tag.code.contents[-1].replace_with('')
-        else:
-            tag.string.replace_with(tag.string.rstrip())
         self.render_paragraph(tag.code)
+
+    def render_list(self, tag):
+        if tag.name == 'ul': style = 'List Bullet'
+        else: style = 'List Number'
+        for i in tag.select('li'):
+            self.render_paragraph(i).style = self.doc.styles[style]
 
     def render_tag(self, tag, level=0):
         self.stack.append(tag)
@@ -520,6 +574,8 @@ class HtmlToDocx:
                 self.render_table(tag)
             case 'pre':
                 self.render_code(tag)
+            case 'ul' | 'ol':
+                self.render_list(tag)
             case _:
                 rendered = False
         
