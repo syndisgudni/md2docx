@@ -46,30 +46,16 @@ Another paragraph is required to explain all the bad things an adversary could d
 ![puppy](puppy.jpeg)
 **Figure 1.3:** *Puppy caption with `code` in it.*
 
-<table class="reqres">
-    <thead>
-    <tr>
-        <th colspan=2><b>Reproduction example</b></th><th></th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td style="width:50pt"><b>Request</b></td>
-            <td style="width:400pt">
-<pre><code class="language-http">
+```reqres
+--- Request | This is an explanation of what is going on
 GET /hello.htm HTTP/1.1
 User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
 Host: www.tutorialspoint.com
 Accept-Language: en-us
 Accept-Encoding: gzip, deflate
 Connection: Keep-Alive
-</code></pre>
-            </td>
-        </tr>
-        <tr>
-            <td><b>Response</b></td>
-            <td>
-<pre><code class="language-http">
+
+--- Response | 
 HTTP/1.1 200 OK
 Date: Mon, 27 Jul 2009 12:28:53 GMT
 Server: Apache/2.2.14 (Win32)
@@ -78,17 +64,35 @@ Content-Length: 88
 Content-Type: text/html
 Connection: Closed
 
-&lt;html&gt;
-    &lt;body&gt;
-        &lt;h1&gt;Hello, World!&lt;/h1&gt;
-    &lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-            </td>
-        </tr>
-    </tbody>
-</table>
+<html>
+    <body>
+        <h1>Hello, World!</h1>
+    </body>
+</html>
 
+--- Ternary bullshit | Not a thing, actually!
+GET /hello.htm HTTP/1.1
+User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
+Host: www.tutorialspoint.com
+Accept-Language: en-us
+Accept-Encoding: gzip, deflate
+Connection: Keep-Alive
+
+--- Responseroni
+HTTP/1.1 200 OK
+Date: Mon, 27 Jul 2009 12:28:53 GMT
+Server: Apache/2.2.14 (Win32)
+Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT
+Content-Length: 88
+Content-Type: text/html
+Connection: Closed
+
+<html>
+    <body>
+        <h1>Hello, World!</h1>
+    </body>
+</html>
+```
 **Figure 1.4:** *Request/response example.*
 
 ### Recommendation

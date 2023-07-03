@@ -191,12 +191,40 @@ def table_dimensions(table):
     cols = len(table.tr.select('th,td'))
     return rows, cols
 
+def generate_reqres(contents):
+    table = '''<table class="reqres">
+            <thead>
+            <tr>
+                <th style="" colspan=2><b>Reproduction example</b></th><th style=""></th>
+            </tr>
+            </thead>
+            <tbody>{}</tbody>
+        </table>'''
+    rows = ''
+    for key, val in [s.split('\n', 1) for s in contents.split('--- ')[1:]]:
+        blurb =''
+        if '|' in key: key, blurb = key.split('|', 1)
+        row = '''<tr>
+                <td style="width:50pt"><b>{}</b><i>{}</i></td>
+                <td style="width:400pt">
+                    <pre><code class="language-http">{}</code></pre>
+                </td>
+            </tr>'''.format(key.strip(),'\n'+blurb.strip(),highlight(val.strip(),'http'))
+        rows += row
+    return table.format(rows)
+
 def apply_html_style(soup):
     # Global
     base_style = {
         'font-family': 'Calibri',
         'font-size': '11pt'
     }
+
+    # Parse custom code block for later styling
+    for t in soup.select('pre > code.language-reqres'):
+        inner_html = generate_reqres(t.get_text()) # TODO
+        new_soup = bs(inner_html, 'html.parser')
+        t.parent.replace_with(new_soup)
 
     # Text
     for t in soup.select('p, th, td, li'):
@@ -332,6 +360,7 @@ def apply_html_style(soup):
             style['color'] = '#ffffff'
             style['background-color'] = COLOR_SYN_BLUE
             style['width'] = '82.512pt'
+            style['border-top'] = '4px solid %s' % COLOR_SYN_BLUE
             c['style'] = dict_to_style(style)
             ### Second column
             c = r.select('td:nth-child(2)')[0]
@@ -415,6 +444,18 @@ class HtmlToDocx:
         p_format.space_before = Pt(1)
 
         return doc
+
+    def strip_paragraph(self, p):
+        # Clear leading empty runs
+        for r in p.runs:
+            if not r.text == '\n':
+                break
+            r.text = ''
+        # Clear trailing empty runs
+        for r in reversed(p.runs):
+            if not r.text == '\n':
+                break
+            r.text = ''
 
     def apply_inline_style(self, r, style):
         if 'font-family' in style:
@@ -532,6 +573,8 @@ class HtmlToDocx:
         # Merge top-row cells in request/response tables
         if 'class' in tag.attrs and 'reqres' in tag['class']:
             t.cell(0, 0).merge(t.cell(0, 1))
+            for c in t.columns[1].cells:
+                self.strip_paragraph(c.paragraphs[0])
 
         return t
 
@@ -592,7 +635,7 @@ class HtmlToDocx:
         return self.doc
 
 
-arg_parser = argparse.ArgumentParser(description='Generate Docx reports using a Docx reference template and Markdown files')
+arg_parser = argparse.ArgumentParser(description='Generate a Docx file from one or more Markdown files')
 arg_parser.add_argument('output', default=None, help='Output file')
 arg_parser.add_argument('--files', default="*.md", help='Regex for Markdown files')
 args = arg_parser.parse_args()
