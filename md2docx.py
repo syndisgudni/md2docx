@@ -220,9 +220,10 @@ def apply_html_style(soup):
         'font-size': '11pt'
     }
 
-    # Parse custom code block for later styling
+    # Parse custom reproduction example code block
+    # to HTML table for later styling
     for t in soup.select('pre > code.language-reqres'):
-        inner_html = generate_reqres(t.get_text()) # TODO
+        inner_html = generate_reqres(t.get_text())
         new_soup = bs(inner_html, 'html.parser')
         t.parent.replace_with(new_soup)
 
@@ -360,7 +361,7 @@ def apply_html_style(soup):
             style['color'] = '#ffffff'
             style['background-color'] = COLOR_SYN_BLUE
             style['width'] = '82.512pt'
-            style['border-top'] = '4px solid %s' % COLOR_SYN_BLUE
+            style['border-top'] = '6px solid %s' % COLOR_SYN_BLUE
             c['style'] = dict_to_style(style)
             ### Second column
             c = r.select('td:nth-child(2)')[0]
@@ -399,7 +400,7 @@ def apply_html_style(soup):
             else: style = base_style.copy()
             style['width'] = '80pt'
             style['font-size'] = '12pt'
-            style['color'] = '#676767'
+            style['color'] = '#434343'
             c['style'] = dict_to_style(style)
             ### Second column
             c = r.select('td:nth-child(2)')[0]
@@ -442,7 +443,29 @@ class HtmlToDocx:
         section.right_margin = Inches(1)
 
         p_format = doc.styles['Normal'].paragraph_format
-        p_format.space_before = Pt(1)
+        p_format.line_spacing = 1.0
+        p_format.space_before = Pt(0)
+        p_format.space_after = Pt(11)
+
+        p_format = doc.styles['Heading 1'].paragraph_format
+        p_format.line_spacing = 1.0
+        p_format.space_before = Pt(0)
+        p_format.space_after = Pt(6)
+
+        p_format = doc.styles['Heading 2'].paragraph_format
+        p_format.line_spacing = 1.0
+        p_format.space_before = Pt(18)
+        p_format.space_after = Pt(6)
+
+        p_format = doc.styles['Heading 3'].paragraph_format
+        p_format.line_spacing = 1.0
+        p_format.space_before = Pt(16)
+        p_format.space_after = Pt(4)
+
+        p_format = doc.styles['Heading 4'].paragraph_format
+        p_format.line_spacing = 1.0
+        p_format.space_before = Pt(14)
+        p_format.space_after = Pt(4)
 
         return doc
 
@@ -566,6 +589,9 @@ class HtmlToDocx:
                 soup_cell = soup_cells[c]
                 self.render_paragraph(soup_cell, cell.paragraphs[0])
                 self.apply_cell_style(cell, get_style(soup_cell))
+                par_form = cell.paragraphs[0].paragraph_format
+                par_form.space_before = Pt(5)
+                par_form.space_after = Pt(5)
         
         for c, col in enumerate(t.columns):
             soup_cell = tag.select('td:nth-child(%d)' % (c+1))[0]
@@ -583,6 +609,10 @@ class HtmlToDocx:
         level = int(tag.name[1])
         h = self.doc.add_heading('', level)
         self.apply_block_style(h, get_style(tag))
+        par_form = h.paragraph_format
+        par_form.line_spacing = 1.0
+        par_form.space_before = Pt(16)
+        par_form.space_after = Pt(4)
         self.render_text(tag, h)
         return h
 

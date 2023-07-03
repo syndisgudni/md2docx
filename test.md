@@ -14,7 +14,7 @@ Stuff and things are bad and therefore not good. It cannot be stressed enough ho
 
 Here is a **TODO** list with ***some* things** of those *items* that have yet to be `done` for this project.
 * Add some `code` ***stuff*** and *things*!
-* Also, put imgs and code blocks in figures.
+* Also, put `img`s and code blocks in figures.
 
 Why not? Here's another list but with numbers:
 1. The quick brown fox
