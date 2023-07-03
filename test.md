@@ -70,7 +70,7 @@ Connection: Closed
     </body>
 </html>
 
---- Ternary bullshit | Not a thing, actually!
+--- Ternary bullshit | Not a thing actually, but supported!
 GET /hello.htm HTTP/1.1
 User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
 Host: www.tutorialspoint.com

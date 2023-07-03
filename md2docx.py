@@ -205,7 +205,7 @@ def generate_reqres(contents):
         blurb =''
         if '|' in key: key, blurb = key.split('|', 1)
         row = '''<tr>
-                <td style="width:50pt"><b>{}</b><i>{}</i></td>
+                <td style="width:50pt"><b>{}</b><i style="font-size:10pt">{}</i></td>
                 <td style="width:400pt">
                     <pre><code class="language-http">{}</code></pre>
                 </td>
@@ -399,6 +399,7 @@ def apply_html_style(soup):
             else: style = base_style.copy()
             style['width'] = '80pt'
             style['font-size'] = '12pt'
+            style['color'] = '#676767'
             c['style'] = dict_to_style(style)
             ### Second column
             c = r.select('td:nth-child(2)')[0]
