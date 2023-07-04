@@ -209,7 +209,7 @@ def generate_reqres(contents):
                 <td style="width:400pt">
                     <pre><code class="language-http">{}</code></pre>
                 </td>
-            </tr>'''.format(key.strip(),'\n'+blurb.strip(),highlight(val.strip(),'http'))
+            </tr>'''.format(key.strip(),'\n'+blurb.strip(),val.strip())
         rows += row
     return table.format(rows)
 
