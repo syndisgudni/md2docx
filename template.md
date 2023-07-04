@@ -18,11 +18,11 @@ function fibonacci(num) {
     b = 0,
     temp;
 
-  [[while (num >= 0)]] {
+  while (num >= 0) {
     temp = a;
     a = a + b;
     b = temp;
-    [[num++;]]
+    num++;
   }
 
   return b;
